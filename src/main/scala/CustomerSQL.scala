@@ -1,8 +1,8 @@
+import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions._
-import org.apache.log4j.{Logger,Level}
-object Customer {
+
+object CustomerSQL {
 
   def main(args: Array[String]): Unit = {
 
@@ -29,17 +29,32 @@ object Customer {
     ).toDF("OrderID", "Customer", "Amount")
     orderData.show()
 
+    orderData.createOrReplaceTempView("orderData")
+
     // Group by Customer and calculate the count of orders
-    val orderCountByCustomer = orderData.groupBy("Customer")
-      .agg(count("OrderID").alias("OrderCount"))
-    // Group by Customer and calculate the sum of Amount
-    val totalAmountByCustomer = orderData.groupBy("Customer")
-      .agg(sum("Amount").alias("TotalAmount"))
+
+    val orderCountByCustomer = spark.sql(
+      """ SELECT Customer,
+          COUNT(OrderID) AS ORDER_COUNT
+          FROM orderData
+          GROUP BY Customer
+
+        """)
     orderCountByCustomer.show()
-    totalAmountByCustomer.show()
 
+    // Group by Customer and calculate the sum of Amount
 
+    val TotalAmountByCustomer = spark.sql(
+      """
+        SELECT Customer,
+        SUM(Amount) AS Total_Amount
+        FROM orderData
+        GROUP BY Customer
+        """
+    )
 
+    TotalAmountByCustomer.show()
 
   }
 }
+
