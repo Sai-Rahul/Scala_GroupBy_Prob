@@ -35,7 +35,7 @@ object LeadExample {
 
     val window = Window.orderBy("Revenue")
 
-    val df2 = salesData.withColumn("Lead_Column",lead(col("Revenue"),2).over(window))
+    val df2 = salesData.withColumn("Lead_Column",col("Revenue")-lead(col("Revenue"),2).over(window))
 
     df2.show()
 
